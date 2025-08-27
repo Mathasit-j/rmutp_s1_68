@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "tsc app/server.ts --outDir dist"
+    "build": "tsc"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.0",
