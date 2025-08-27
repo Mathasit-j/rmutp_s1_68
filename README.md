@@ -1,6 +1,6 @@
 #Prisma
 
-Tanapat Nunkhong
+Mathasit Jaihow
 ## Required
 - Git
 - docker & DockerCompose
