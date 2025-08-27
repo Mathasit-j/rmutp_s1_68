@@ -10,6 +10,6 @@ app.get('/about', (c) => { return c.json({ message: "Mathasit Jaihow" }); });
 app.get("/profile", (c) => {
     //logic
     const profiles = prisma.profile.findMany();
-    return profiles;
+    return c.json(profiles);
 });
 exports.default = app;
