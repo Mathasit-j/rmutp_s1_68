@@ -7,9 +7,9 @@ const prisma = new client_1.PrismaClient();
 const app = new hono_1.Hono();
 app.get('/', (c) => c.text('Hono!'));
 app.get('/about', (c) => { return c.json({ message: "Mathasit Jaihow" }); });
-app.get("/profile", (c) => {
+app.get("/profile", async (c) => {
     //logic
-    const profiles = prisma.profile.findMany();
+    const profiles = await prisma.profile.findMany();
     return c.json(profiles);
 });
 exports.default = app;
