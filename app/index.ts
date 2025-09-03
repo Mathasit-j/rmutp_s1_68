@@ -28,7 +28,11 @@ app.post("/profile", async (c) => {
     console.log("hash.password(after)", passwordHash);
     body.password = passwordHash;
     console.log("body.password(replace)", body);
+    
     //save to db
+    await prisma.profile.create({
+        data:body
+    });
 
     //output response
     return c.json({
