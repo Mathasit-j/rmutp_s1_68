@@ -21,7 +21,7 @@ app.post("/profile", async (c) => {
     //output response
     return c.json({
         message: "create profile completed"
-    });
+    })
 });
 
 export default app
