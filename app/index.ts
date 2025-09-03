@@ -22,9 +22,12 @@ app.post("/profile", async (c) => {
     console.log("input of profile", body);
     console.log("body.passwaord(original)",body.password);
 
+
     //encode password
     const passwordHash = await bcrypt.hash(body.password, 10);
     console.log("hash.password(after)", passwordHash);
+    body.password = passwordHash;
+    console.log("body.password(replace)", body);
     //save to db
 
     //output response
