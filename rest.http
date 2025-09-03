@@ -1,0 +1,9 @@
+#RET API
+##GET ALL PROFILE
+
+GET http://localhost:3000/profile
+
+##  Create new Profile
+### curl -X POST http://localhost:3000/profile
+
+POST http://localhost:3000/profile
