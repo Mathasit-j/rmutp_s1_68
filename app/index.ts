@@ -18,6 +18,12 @@ app.post("/profile", async (c) => {
     //logic to create a new profile
     const body = await c.req.json();
     console.log("input of profile", body);
+    console.log("body.passwaord(original)",body.password);
+
+    //encode password
+
+    //save to db
+
     //output response
     return c.json({
         message: "create profile completed"
