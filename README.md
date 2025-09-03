@@ -41,6 +41,8 @@ npx prisma db push
 ### Nomal
 ```bash
 npx pisma generate
+npx db push
+npx prisma format //จักหน้ากระดาษ
 ```
 ### hono
 ```bash

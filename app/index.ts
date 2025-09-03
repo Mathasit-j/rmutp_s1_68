@@ -30,13 +30,15 @@ app.post("/profile", async (c) => {
     console.log("body.password(replace)", body);
     
     //save to db
-    await prisma.profile.create({
+    body.status= false;
+    const result = await prisma.profile.create({
         data:body
     });
 
     //output response
     return c.json({
-        message: "create profile completed"
+        message: "create profile completed",
+        data:result
     })
 });
 
