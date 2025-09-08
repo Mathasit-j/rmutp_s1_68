@@ -55,7 +55,7 @@ app.post("/profile", async (c) => {
         return c.json({ message: `ข้อมูลซ้ำ: ${duplicatedFields.join(', ')}` }, 503);
     }
     //encode password
-    const passwordHash = await bcrypt.hash(body.password, 18);
+    const passwordHash = await bcrypt.hash(body.password, 10);
     console.log('hash.password(after)', passwordHash);
     body.password = passwordHash;
     console.log('body.password(replace)', body);
