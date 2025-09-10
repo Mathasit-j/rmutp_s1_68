@@ -3,7 +3,7 @@
     "start": "node dist/server.js",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node dist/server.js"
+    "dev": "npm run build && node dist/server.js"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.0",
