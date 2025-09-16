@@ -2,79 +2,53 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const hono_1 = require("hono");
 const client_1 = require("@prisma/client");
-// import { PrismaClient } from "../generated/prisma/client";
 const bcrypt = require("bcrypt");
-// import { Md5 } from "md5-typescript";
 const service_1 = require("./service");
 const prisma = new client_1.PrismaClient();
 const app = new hono_1.Hono();
-app.get("/", (c) => c.text("Hello, World!"));
+app.get("/", (c) => c.text("Hono!"));
 app.get("/about", (c) => {
-    return c.json({
-        message: "Mathasit Jaihow"
-    });
+    return c.json({ message: "Mathasit Jaihow " });
 });
 app.get("/profile", async (c) => {
-    //logic
-    const profiles = await prisma.profile.findMany();
-    return c.json(profiles);
+    const profile = await prisma.profile.findMany();
+    const decodedProfiles = profile.map((p) => (Object.assign(Object.assign({}, p), { mobile: (0, service_1.decode)(p.mobile), cardId: (0, service_1.decode)(p.cardId) })));
+    return c.json(decodedProfiles);
 });
 app.post("/profile", async (c) => {
-    //logic to create a new profile
     const body = await c.req.json();
-    // console.log('input of profile ', body);
-    // console.log('body.password(original) ', body.password);
-    //encode password
-    const passwordHash = await bcrypt.hash(body.password, 13);
-    // console.log('hash.password(after) ', passwordHash);
-    body.password = passwordHash;
-    // console.log('body.password(replace) ', body);
-    //encode mobile
-    // body.mobile = Md5.init(body.mobile);
-    body.mobile = (0, service_1.encode)(body.mobile);
-    //encode cardId
-    // body.cardId = Md5.init(body.cardId);
-    body.cardId = (0, service_1.encode)(body.cardId);
-    //data before save
-    console.log('data before save ', body);
-    // return c.json({
-    //     message: "data before save",
-    //     data: body
-    // });
-    //save to db
+    console.log("input of profile", body);
+    console.log("body.password(original)", body.password);
+    // encode 
+    const encMobile = (0, service_1.encode)(body.mobile);
+    const encCardId = (0, service_1.encode)(body.cardId);
+    const existingProfile = await prisma.profile.findFirst({
+        where: {
+            OR: [{ mobile: encMobile }, { cardId: encCardId }],
+        },
+    });
+    if (existingProfile) {
+        let duplicatedFields = [];
+        if ((0, service_1.decode)(existingProfile.mobile) === body.mobile)
+            duplicatedFields.push("mobile");
+        if ((0, service_1.decode)(existingProfile.cardId) === body.cardId)
+            duplicatedFields.push("cardId");
+        return c.json({ message: `ข้อมูลซ้ำ: ${duplicatedFields.join(", ")}` }, 503);
+    }
+    // hash password 
+    body.password = await bcrypt.hash(body.password, 18);
+    // save
+    body.mobile = encMobile;
+    body.cardId = encCardId;
     body.status = false;
     const result = await prisma.profile.create({
-        data: body
-    })
-        .then(data => {
-        delete data.password;
-        console.log('create profile completed', data);
-        return data;
-    })
-        .catch(err => {
-        console.log(`create profile failed `, JSON.stringify(err === null || err === void 0 ? void 0 : err.message));
-        // switch case error message
-        return "please recheck username, mobile or cardId";
+        data: body,
     });
-    //output response
+    // decode 
+    c.status(200);
     return c.json({
         message: "create profile completed",
-        data: result
+        data: result,
     });
-});
-app.get("/profile/:id", async (c) => {
-    //get some data from db
-    const id = c.req.param('id');
-    console.log('id ', id);
-    const profile = await prisma.profile.findFirstOrThrow({
-        where: {
-            id: id
-        }
-    });
-    delete profile.password;
-    return c.json({
-        message: "get data completed",
-        data: profile
-    }, 200);
 });
 exports.default = app;
