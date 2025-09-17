@@ -8,7 +8,7 @@ const app = new Hono();
 
 app.get("/", (c) => c.text("Hono!"));
 app.get("/about", (c) => {
-  return c.json({ message: "Mathasit Jaihow " });
+  return c.json({ message: "Tanapat Nunkhong " });
 });
 
 //GET profiles
@@ -67,6 +67,28 @@ app.post("/profile", async (c) => {
     message: "create profile completed",
     data: result,
   });
+});
+
+app.get("/profile/:id", async (c) => {
+    //get some data from db
+    const id = c.req.param('id');
+    console.log('id ', id);
+    const profile = await prisma.profile.findFirstOrThrow({
+        where: {
+            id: id
+        }
+    });
+    delete profile.password;
+    console.log('cardId', profile.cardId.length);
+    console.log('mobile', profile.mobile.length);
+    profile.cardId = decode(profile.cardId);
+    profile.mobile = decode(profile.mobile);
+    // profile.mobile =
+
+    return c.json({
+        message: "get data completed",
+        data: profile
+    }, 200);
 });
 
 export default app;
