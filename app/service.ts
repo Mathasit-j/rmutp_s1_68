@@ -3,10 +3,10 @@ import * as crypto from "crypto";
 const algorithm = "aes-256-cbc";
 
 if (!process.env.SECRET_KEY) {
-  throw new Error("❌ SECRET_KEY ไม่ถูกกำหนดใน environment variables!");
+  throw new Error("ไม่มี SECRET_KEY environment variables");
 }
 
-// แปลง SECRET_KEY เป็น 32 bytes ด้วย SHA-256 hash
+// แปลง SECRET_KEY เป็น 32 bytes
 const ENCRYPTION_KEY = crypto.createHash("sha256")
   .update(process.env.SECRET_KEY || "default_secret")
   .digest();
@@ -14,11 +14,11 @@ const ENCRYPTION_KEY = crypto.createHash("sha256")
 // log key ใน base64
 console.log("key:", ENCRYPTION_KEY.toString("base64"));
 
-// สุ่ม IV ตัวอย่าง (จะสุ่มใหม่ทุกครั้ง)
+// สุ่ม IV
 const iv = crypto.randomBytes(16);
 console.log("iv:", iv.toString("hex"));
 
-// 📌 ฟังก์ชันเข้ารหัส
+// ฟังก์ชันเข้ารหัส
 export function encrypted(text: string): string {
   const iv = crypto.randomBytes(16); // 16 bytes IV
   const cipher = crypto.createCipheriv(algorithm, ENCRYPTION_KEY, iv);
@@ -30,7 +30,7 @@ export function encrypted(text: string): string {
   return iv.toString("base64") + ":" + encrypted;
 }
 
-// 📌 ฟังก์ชันถอดรหัส
+// ฟังก์ชันถอดรหัส
 export function decrypted(packed: string): string {
   const [ivB64, cipherB64] = packed.split(":");
   if (!ivB64 || !cipherB64) {
