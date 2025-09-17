@@ -10,41 +10,41 @@ app.get("/", (c) => c.text("Hono!"));
 app.get("/about", (c) => {
     return c.json({ message: "Mathasit Jaihow " });
 });
+//GET profiles
 app.get("/profile", async (c) => {
-    const profile = await prisma.profile.findMany();
-    const decodedProfiles = profile.map((p) => (Object.assign(Object.assign({}, p), { mobile: (0, service_1.decode)(p.mobile), cardId: (0, service_1.decode)(p.cardId) })));
+    const profiles = await prisma.profile.findMany();
+    const decodedProfiles = profiles.map((p) => (Object.assign(Object.assign({}, p), { mobile: (0, service_1.decrypted)(p.mobile), cardId: (0, service_1.decrypted)(p.cardId) })));
     return c.json(decodedProfiles);
 });
+//CREATE profile
 app.post("/profile", async (c) => {
     const body = await c.req.json();
     console.log("input of profile", body);
     console.log("body.password(original)", body.password);
-    // encode 
-    const encMobile = (0, service_1.encode)(body.mobile);
-    const encCardId = (0, service_1.encode)(body.cardId);
-    const existingProfile = await prisma.profile.findFirst({
-        where: {
-            OR: [{ mobile: encMobile }, { cardId: encCardId }],
-        },
-    });
-    if (existingProfile) {
-        let duplicatedFields = [];
-        if ((0, service_1.decode)(existingProfile.mobile) === body.mobile)
+    // encode sensitive fields
+    const encMobile = (0, service_1.encrypted)(body.mobile);
+    const encCardId = (0, service_1.encrypted)(body.cardId);
+    // ---- ตรวจซ้ำ (ต้อง decode จาก DB มาเช็ค) ----
+    const existingProfiles = await prisma.profile.findMany();
+    const duplicatedFields = [];
+    for (const p of existingProfiles) {
+        if ((0, service_1.decrypted)(p.mobile) === body.mobile)
             duplicatedFields.push("mobile");
-        if ((0, service_1.decode)(existingProfile.cardId) === body.cardId)
+        if ((0, service_1.decrypted)(p.cardId) === body.cardId)
             duplicatedFields.push("cardId");
+    }
+    if (duplicatedFields.length > 0) {
         return c.json({ message: `ข้อมูลซ้ำ: ${duplicatedFields.join(", ")}` }, 503);
     }
-    // hash password 
-    body.password = await bcrypt.hash(body.password, 18);
-    // save
+    // ---- hash password ----
+    body.password = await bcrypt.hash(body.password, 12); // แนะนำใช้ 12
+    // ---- save to db ----
     body.mobile = encMobile;
     body.cardId = encCardId;
     body.status = false;
     const result = await prisma.profile.create({
         data: body,
     });
-    // decode 
     c.status(200);
     return c.json({
         message: "create profile completed",
